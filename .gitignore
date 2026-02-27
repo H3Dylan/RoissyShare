@@ -1,0 +1,31 @@
+# Dépendances Node.js
+node_modules/
+
+# Fichiers d'environnement (Sécurité : ne JAMAIS push les mots de passe et clés JWT)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Dossiers de Build (Générés automatiquement)
+frontend/dist/
+frontend/build/
+
+# Fichiers de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Fichiers système et IDE
+.DS_Store
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Uploads dynamiques (Ne pas versionner les images des utilisateurs)
+backend/uploads/
