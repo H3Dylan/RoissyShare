@@ -1,0 +1,136 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis()]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  firstname String
+  lastname  String
+  role      Role     @default(MEMBER)
+  
+  structureId String
+  structure   Structure @relation(fields: [structureId], references: [id])
+
+  messagesSent     Message[] @relation("SentMessages")
+  messagesReceived Message[] @relation("ReceivedMessages")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Structure {
+  id          String   @id @default(uuid())
+  siret       String   @unique
+  name        String
+  description String?
+  logoUrl     String?
+  type        StructureType
+
+  address     String
+  latitude    Float
+  longitude   Float
+  
+  location    Unsupported("geometry(Point, 4326)")?
+
+  users       User[]
+  listings    Listing[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Listing {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  images      String[]
+  status      ListingStatus @default(AVAILABLE)
+  category    ListingCategory
+  
+  weightKg    Float
+
+  structureId String
+  structure   Structure @relation(fields: [structureId], references: [id])
+
+  conversations Conversation[]
+  transactions  Transaction[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+
+  messages  Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  content        String
+  
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  senderId       String
+  sender         User     @relation("SentMessages", fields: [senderId], references: [id])
+  
+  receiverId     String
+  receiver       User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  createdAt      DateTime @default(now())
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  
+  listingId   String
+  listing     Listing  @relation(fields: [listingId], references: [id])
+
+  donorId     String
+  receiverId  String
+
+  weightSavedKg Float
+  co2SavedKg    Float
+
+  completedAt DateTime @default(now())
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum StructureType {
+  DONOR
+  RECEIVER
+  BOTH
+}
+
+enum ListingStatus {
+  AVAILABLE
+  RESERVED
+  GIVEN
+}
+
+enum ListingCategory {
+  FURNITURE
+  ELECTRONICS
+  LOGISTICS_EQUIPMENT
+  OTHER
+}
