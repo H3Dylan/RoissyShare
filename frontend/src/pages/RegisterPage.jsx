@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/api';
+import { AuthContext } from '../context/AuthContext';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -17,6 +18,13 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const navigate = useNavigate();
+    const { isAuthenticated } = React.useContext(AuthContext);
+
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/search');
+        }
+    }, [isAuthenticated, navigate]);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

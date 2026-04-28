@@ -8,8 +8,14 @@ export default function LoginPage() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { login } = useContext(AuthContext);
+    const { login, isAuthenticated } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    React.useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/search');
+        }
+    }, [isAuthenticated, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -19,7 +25,7 @@ export default function LoginPage() {
         const result = await login(email, password);
 
         if (result.success) {
-            navigate('/dashboard'); // On redirigera vers le dashboard
+            navigate('/search');
         } else {
             setError(result.error);
             setLoading(false);

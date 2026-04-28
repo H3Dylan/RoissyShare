@@ -4,16 +4,17 @@ import { AuthProvider, AuthContext } from './context/AuthContext';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
+import CreateListingPage from './pages/CreateListingPage';
+import MyListingsPage from './pages/MyListingsPage';
+import ListingDetailPage from './pages/ListingDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Link } from 'react-router-dom';
+import { Search, MessageSquare } from 'lucide-react';
 
-// Dashboard temporaire pour tester la route protégée
-const DashboardPlaceholder = () => (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center font-sans">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Tableau de Bord</h1>
-        <p className="text-lg text-gray-600">Bienvenue sur l'espace B2B ! 🎉</p>
-    </div>
-);
+import SearchPage from './pages/SearchPage';
+import MessagesIndexPage from './pages/MessagesIndexPage';
+import ConversationPage from './pages/ConversationPage';
+import DashboardRSEPage from './pages/DashboardRSEPage';
 
 // Composant NavBar pour naviguer
 const Navigation = () => {
@@ -30,7 +31,14 @@ const Navigation = () => {
                             <span className="text-purple-600 font-bold text-xl">Roissy Share</span>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <Link to="/dashboard" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Dashboard</Link>
+                            <Link to="/search" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <Search className="w-4 h-4 mr-1" /> Trouver du matériel
+                            </Link>
+                            <Link to="/messages" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <MessageSquare className="w-4 h-4 mr-1" /> Messages
+                            </Link>
+                            <Link to="/my-listings" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Mes Annonces</Link>
+                            <Link to="/dashboard-rse" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Impact RSE</Link>
                             <Link to="/profile" className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">Mon Profil</Link>
                         </div>
                     </div>
@@ -44,21 +52,27 @@ const Navigation = () => {
 };
 
 
+const RootRedirect = () => {
+    const { isAuthenticated } = React.useContext(AuthContext);
+    return isAuthenticated ? <Navigate to="/search" replace /> : <Navigate to="/login" replace />;
+};
+
+
 function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
                 <Navigation />
                 <Routes>
-                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/" element={<RootRedirect />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
 
                     <Route
-                        path="/dashboard"
+                        path="/search"
                         element={
                             <ProtectedRoute>
-                                <DashboardPlaceholder />
+                                <SearchPage />
                             </ProtectedRoute>
                         }
                     />
@@ -70,6 +84,59 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/my-listings"
+                        element={
+                            <ProtectedRoute>
+                                <MyListingsPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/create-listing"
+                        element={
+                            <ProtectedRoute>
+                                <CreateListingPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/listings/:id"
+                        element={
+                            <ProtectedRoute>
+                                <ListingDetailPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/dashboard-rse"
+                        element={
+                            <ProtectedRoute>
+                                <DashboardRSEPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* ROUTES DE MESSAGERIE */}
+                    <Route
+                        path="/messages"
+                        element={
+                            <ProtectedRoute>
+                                <MessagesIndexPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/messages/:id"
+                        element={
+                            <ProtectedRoute>
+                                <ConversationPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* Redirection par défaut */}
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </AuthProvider>
         </BrowserRouter>
