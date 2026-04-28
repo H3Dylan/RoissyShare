@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { MapPin, Package, ArrowLeft, Mail, Calendar, Weight, CheckCircle, Repeat } from 'lucide-react';
+import { MapPin, Package, ArrowLeft, Mail, Calendar, Weight, CheckCircle, Repeat, Trash2 } from 'lucide-react';
 
 export default function ListingDetailPage() {
     const { id } = useParams();
@@ -55,6 +55,21 @@ export default function ListingDetailPage() {
         } catch (err) {
             alert("Impossible de mettre à jour le statut.");
         } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette annonce ?")) {
+            return;
+        }
+
+        try {
+            setUpdating(true);
+            await api.delete(`/listings/${id}`);
+            navigate('/my-listings');
+        } catch (err) {
+            alert("Erreur lors de la suppression.");
             setUpdating(false);
         }
     };
@@ -158,6 +173,14 @@ export default function ListingDetailPage() {
                                                 Marquer réservé
                                             </button>
                                         )}
+                                        <button
+                                            onClick={handleDelete}
+                                            disabled={updating}
+                                            className="inline-flex justify-center items-center px-6 py-3 border border-red-300 text-base font-medium rounded-md text-red-700 bg-white hover:bg-red-50 disabled:bg-gray-100"
+                                        >
+                                            <Trash2 className="w-5 h-5 mr-2" />
+                                            Supprimer
+                                        </button>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-4">
                                         En tant que propriétaire, vous pouvez gérer le cycle de vie de cette annonce pour vos bilans RSE.

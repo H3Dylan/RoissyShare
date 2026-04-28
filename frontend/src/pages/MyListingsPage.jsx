@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Package, MoreVertical, Edit2, Repeat, CheckCircle, Leaf, BarChart2 } from 'lucide-react';
+import { Package, MoreVertical, Edit2, Repeat, CheckCircle, Leaf, BarChart2, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function MyListingsPage() {
@@ -41,6 +41,19 @@ export default function MyListingsPage() {
             fetchMyListings();
         } catch (err) {
             alert("Impossible de mettre à jour le statut.");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer définitivement cette annonce ? Cette action est irréversible.")) {
+            return;
+        }
+
+        try {
+            await api.delete(`/listings/${id}`);
+            fetchMyListings();
+        } catch (err) {
+            alert("Erreur lors de la suppression de l'annonce.");
         }
     };
 
@@ -130,8 +143,15 @@ export default function MyListingsPage() {
                                         <Package className="w-8 h-8" />
                                     </div>
                                 )}
-                                <div className="absolute top-2 right-2">
+                                <div className="absolute top-2 right-2 flex gap-1">
                                     {getStatusBadge(listing.status)}
+                                    <button 
+                                        onClick={() => handleDelete(listing.id)}
+                                        className="bg-white/90 hover:bg-red-50 p-1.5 rounded-full text-red-500 shadow-sm transition-colors border border-gray-200"
+                                        title="Supprimer l'annonce"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                 </div>
                             </div>
 
