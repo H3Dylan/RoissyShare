@@ -6,109 +6,104 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [postgis()]
+  extensions = [postgis]
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  firstname String
-  lastname  String
-  role      Role     @default(MEMBER)
-  
-  structureId String
-  structure   Structure @relation(fields: [structureId], references: [id])
-
-  messagesSent     Message[] @relation("SentMessages")
-  messagesReceived Message[] @relation("ReceivedMessages")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                          String         @id @default(uuid())
+  email                       String         @unique
+  password                    String
+  firstname                   String
+  lastname                    String
+  role                        Role           @default(MEMBER)
+  structureId                 String
+  createdAt                   DateTime       @default(now())
+  updatedAt                   DateTime       @updatedAt
+  conversationsAsParticipant1 Conversation[] @relation("Participant1")
+  conversationsAsParticipant2 Conversation[] @relation("Participant2")
+  messagesReceived            Message[]      @relation("ReceivedMessages")
+  messagesSent                Message[]      @relation("SentMessages")
+  structure                   Structure      @relation(fields: [structureId], references: [id])
 }
 
 model Structure {
-  id          String   @id @default(uuid())
-  siret       String   @unique
+  id          String                   @id @default(uuid())
+  siret       String                   @unique
   name        String
   description String?
   logoUrl     String?
   type        StructureType
-
   address     String
   latitude    Float
   longitude   Float
-  
-  location    Unsupported("geometry(Point, 4326)")?
-
-  users       User[]
+  location    Unsupported("geometry")?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
   listings    Listing[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  users       User[]
 }
 
 model Listing {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  images      String[]
-  status      ListingStatus @default(AVAILABLE)
-  category    ListingCategory
-  
-  weightKg    Float
-
-  structureId String
-  structure   Structure @relation(fields: [structureId], references: [id])
-
-  conversations Conversation[]
-  transactions  Transaction[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String          @id @default(uuid())
+  title        String
+  description  String
+  images       String[]
+  status       ListingStatus   @default(AVAILABLE)
+  category     ListingCategory
+  weightKg     Float
+  structureId  String
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  structure    Structure       @relation(fields: [structureId], references: [id])
+  messages     Message[]
+  transactions Transaction?
 }
 
 model Conversation {
-  id        String   @id @default(uuid())
-  
-  listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id])
+  id             String    @id @default(uuid())
+  participant1Id String
+  participant2Id String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  participant1   User      @relation("Participant1", fields: [participant1Id], references: [id])
+  participant2   User      @relation("Participant2", fields: [participant2Id], references: [id])
+  messages       Message[]
 
-  messages  Message[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  @@unique([participant1Id, participant2Id])
 }
 
 model Message {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   content        String
-  
   conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-
   senderId       String
-  sender         User     @relation("SentMessages", fields: [senderId], references: [id])
-  
   receiverId     String
-  receiver       User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
-
-  createdAt      DateTime @default(now())
+  listingId      String?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  listing        Listing?     @relation(fields: [listingId], references: [id])
+  receiver       User         @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender         User         @relation("SentMessages", fields: [senderId], references: [id])
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  
-  listingId   String
-  listing     Listing  @relation(fields: [listingId], references: [id])
-
-  donorId     String
-  receiverId  String
-
+  id            String   @id @default(uuid())
+  listingId     String   @unique
+  donorId       String
+  receiverId    String?
   weightSavedKg Float
   co2SavedKg    Float
+  completedAt   DateTime @default(now())
+  listing       Listing  @relation(fields: [listingId], references: [id])
+}
 
-  completedAt DateTime @default(now())
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
 }
 
 enum Role {
@@ -130,7 +125,8 @@ enum ListingStatus {
 
 enum ListingCategory {
   FURNITURE
-  ELECTRONICS
-  LOGISTICS_EQUIPMENT
+  IT_EQUIPMENT
+  PACKAGING
+  UNIFORMS
   OTHER
 }
