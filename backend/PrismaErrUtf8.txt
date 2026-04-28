@@ -1,0 +1,158 @@
+﻿Testing POST equivalent...
+Listing found: fca6d772-2f43-4364-9848-447fa2114fd4
+Testing donor access...
+Donor User: b7303757-493b-4b00-acc8-c262903d5cd1
+Testing GET conversation equivalent...
+node : Prisma error: P
+rismaClientValidationE
+rror: 
+Au caractère Ligne:1 
+: 1
++ node test_prisma.js 
+> PrismaErr.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo    
+          : NotSpeci  
+  fied: (Prisma err   
+ or: P...lidationE    
+rror: :String) []    
+, RemoteException
+    + FullyQualifiedE 
+   rrorId : NativeCo  
+  mmandError
+ 
+Invalid `prisma.conver
+sation.findFirst()` 
+invocation in
+C:\Workspace\RoissySha
+re\backend\test_prisma
+.js:20:56
+
+  17 }
+  18 
+  19 
+console.log("Testing 
+GET conversation 
+equivalent...");
+ÔåÆ 20 const 
+conversation = await p
+risma.conversation.fin
+dFirst({
+       include: {
+         listing: {
+           include: {
+             
+structure: true
+           }
+         },
+         messages: {
+           orderBy: {
+             
+createdAt: "asc"
+           },
+           include: {
+             sender: {
+               
+select: {
+                 id: 
+true,
+                 
+firstName: true,
+                 
+~~~~~~~~~
+                 
+lastName: true,
+                 
+structure: {
+                   
+select: {
+                     
+name: true,
+                     
+logoUrl: true
+                   }
+                 },
+     ?           
+email?: true,
+     ?           
+password?: true,
+     ?           
+firstname?: true,
+     ?           
+lastname?: true,
+     ?           
+role?: true,
+     ?           
+structureId?: true,
+     ?           
+createdAt?: true,
+     ?           
+updatedAt?: true,
+     ?           
+messagesSent?: true,
+     ?           
+messagesReceived?: 
+true,
+     ?           
+_count?: true
+               }
+             },
+             
+receiver: {
+               
+select: {
+                 id: 
+true,
+                 
+firstName: true,
+                 
+lastName: true
+               }
+             }
+           }
+         }
+       }
+     })
+
+Unknown field 
+`firstName` for 
+select statement on 
+model `User`. 
+Available options are 
+marked with ?.
+    at Nn (C:\Workspac
+e\RoissyShare\backend\
+node_modules\@prisma\c
+lient\runtime\library.
+js:29:1363)
+    at 
+ei.handleRequestError 
+(C:\Workspace\RoissySh
+are\backend\node_modul
+es\@prisma\client\runt
+ime\library.js:121:691
+1)
+    at ei.handleAndLog
+RequestError (C:\Works
+pace\RoissyShare\backe
+nd\node_modules\@prism
+a\client\runtime\libra
+ry.js:121:6593)
+    at ei.request (C:\
+Workspace\RoissyShare\
+backend\node_modules\@
+prisma\client\runtime\
+library.js:121:6300)
+    at async a (C:\Wor
+kspace\RoissyShare\bac
+kend\node_modules\@pri
+sma\client\runtime\lib
+rary.js:130:9551)
+    at async test (C:\
+Workspace\RoissyShare\
+backend\test_prisma.js
+:20:30) {
+  clientVersion: 
+'6.19.2'
+}
