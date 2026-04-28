@@ -21,4 +21,7 @@ router.get('/:id', protect, getListingById);
 // Cacher/Donner/Réserver une annonce
 router.patch('/:id/status', protect, updateListingStatus);
 
+// Supprimer une annonce
+router.delete('/:id', protect, deleteListing);
+
 module.exports = router;

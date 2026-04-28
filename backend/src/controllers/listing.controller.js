@@ -243,11 +243,33 @@ async function getRSETimeline(req, res) {
     }
 }
 
+// Supprimer une annonce
+async function deleteListing(req, res) {
+    try {
+        const { id } = req.params;
+        const structureId = req.user.structureId;
+
+        const listing = await prisma.listing.findUnique({
+            where: { id }
+        });
+
+        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
+        if (listing.ownerId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+
+        await prisma.listing.delete({ where: { id } });
+        res.json({ message: "Annonce supprimée." });
+    } catch (error) {
+        console.error("Erreur suppression:", error);
+        res.status(500).json({ error: "Erreur serveur." });
+    }
+}
+
 module.exports = {
     createListing,
     getMyListings,
     updateListingStatus,
     getListingById,
     getRSEStats,
-    getRSETimeline
+    getRSETimeline,
+    deleteListing
 };
