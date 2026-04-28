@@ -249,18 +249,66 @@ async function deleteListing(req, res) {
         const { id } = req.params;
         const structureId = req.user.structureId;
 
+        console.log("Tentative de suppression de l'annonce:", id);
+        console.log("Structure de l'utilisateur (token):", structureId);
+
         const listing = await prisma.listing.findUnique({
             where: { id }
         });
 
-        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
-        if (listing.ownerId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+        if (!listing) {
+            console.log("Annonce non trouvée");
+            return res.status(404).json({ error: "Annonce non trouvée." });
+        }
 
-        await prisma.listing.delete({ where: { id } });
+        console.log("Structure de l'annonce (DB):", listing.structureId);
+
+        if (listing.structureId !== structureId) {
+            console.log("REFUS : Les IDs ne correspondent pas !");
+            return res.status(403).json({ error: "Non autorisé. Cette annonce ne vous appartient pas." });
+        }
+
+        // Suppression en cascade manuelle pour éviter les erreurs de foreign key
+        await prisma.$transaction([
+            prisma.message.deleteMany({ where: { listingId: id } }),
+            prisma.transaction.deleteMany({ where: { listingId: id } }),
+            prisma.listing.delete({ where: { id } })
+        ]);
+
+        console.log("Suppression réussie !");
         res.json({ message: "Annonce supprimée." });
     } catch (error) {
-        console.error("Erreur suppression:", error);
-        res.status(500).json({ error: "Erreur serveur." });
+        console.error("Erreur suppression détail:", error);
+        res.status(500).json({ error: "Erreur serveur lors de la suppression." });
+    }
+}
+
+// Modifier une annonce
+async function updateListing(req, res) {
+    try {
+        const { id } = req.params;
+        const { title, description, category, weightKg } = req.body;
+        const structureId = req.user.structureId;
+
+        const listing = await prisma.listing.findUnique({ where: { id } });
+
+        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
+        if (listing.structureId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+
+        const updatedListing = await prisma.listing.update({
+            where: { id },
+            data: {
+                title: title || listing.title,
+                description: description || listing.description,
+                category: category || listing.category,
+                weightKg: weightKg ? parseFloat(weightKg) : listing.weightKg
+            }
+        });
+
+        res.json(updatedListing);
+    } catch (error) {
+        console.error("Erreur modification:", error);
+        res.status(500).json({ error: "Erreur lors de la modification de l'annonce." });
     }
 }
 
@@ -271,5 +319,6 @@ module.exports = {
     getListingById,
     getRSEStats,
     getRSETimeline,
-    deleteListing
+    deleteListing,
+    updateListing
 };

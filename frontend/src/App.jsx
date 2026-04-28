@@ -7,6 +7,7 @@ import ProfilePage from './pages/ProfilePage';
 import CreateListingPage from './pages/CreateListingPage';
 import MyListingsPage from './pages/MyListingsPage';
 import ListingDetailPage from './pages/ListingDetailPage';
+import EditListingPage from './pages/EditListingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Link } from 'react-router-dom';
 import { Search, MessageSquare } from 'lucide-react';
@@ -105,6 +106,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <ListingDetailPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/edit-listing/:id"
+                        element={
+                            <ProtectedRoute>
+                                <EditListingPage />
                             </ProtectedRoute>
                         }
                     />

@@ -50,7 +50,7 @@ export default function MyListingsPage() {
         }
 
         try {
-            await api.delete(`/listings/${id}`);
+            await api.delete(`listings/${id}`);
             fetchMyListings();
         } catch (err) {
             alert("Erreur lors de la suppression de l'annonce.");
@@ -145,6 +145,13 @@ export default function MyListingsPage() {
                                 )}
                                 <div className="absolute top-2 right-2 flex gap-1">
                                     {getStatusBadge(listing.status)}
+                                    <Link 
+                                        to={`/edit-listing/${listing.id}`}
+                                        className="bg-white/90 hover:bg-purple-50 p-1.5 rounded-full text-purple-600 shadow-sm transition-colors border border-gray-200"
+                                        title="Modifier l'annonce"
+                                    >
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                    </Link>
                                     <button 
                                         onClick={() => handleDelete(listing.id)}
                                         className="bg-white/90 hover:bg-red-50 p-1.5 rounded-full text-red-500 shadow-sm transition-colors border border-gray-200"

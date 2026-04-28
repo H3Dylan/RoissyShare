@@ -1,5 +1,5 @@
 const express = require('express');
-const { createListing, getMyListings, updateListingStatus, getListingById, getRSEStats, getRSETimeline } = require('../controllers/listing.controller');
+const { createListing, getMyListings, updateListingStatus, getListingById, getRSEStats, getRSETimeline, deleteListing, updateListing } = require('../controllers/listing.controller');
 const { protect } = require('../middlewares/auth.middleware');
 const { uploadListingImages } = require('../middlewares/upload.middleware');
 
@@ -23,5 +23,8 @@ router.patch('/:id/status', protect, updateListingStatus);
 
 // Supprimer une annonce
 router.delete('/:id', protect, deleteListing);
+
+// Modifier une annonce
+router.put('/:id', protect, updateListing);
 
 module.exports = router;

@@ -22,7 +22,14 @@ cd ../frontend
 npm install
 ```
 
-### 3. Configuration de l'environnement
+### 3. Lancer la base de données
+Nous utilisons **Docker Compose** pour simplifier le lancement de la base de données (PostgreSQL + PostGIS).
+
+```bash
+docker-compose up -d
+```
+
+### 4. Configuration de l'environnement
 Créez un fichier `.env` dans le dossier `backend/` :
 
 ```env
@@ -31,17 +38,15 @@ DATABASE_URL="postgresql://postgres:password@localhost:5432/roissyshare?schema=p
 JWT_SECRET="roissyshare-dev-secret-key"
 ```
 
-### 4. Base de données
-Assurez-vous que votre conteneur Docker PostgreSQL est lancé, puis initialisez le schéma :
-
+### 5. Initialiser la base (Prisma)
+Une fois le container lancé :
 ```bash
 cd backend
 npx prisma db push
 ```
 
-## 🛠️ Lancement
-
-Pour lancer l'application en mode développement :
+### 6. Lancement de l'application
+Ouvrez deux terminaux :
 
 **Terminal 1 (Backend) :**
 ```bash

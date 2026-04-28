@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import { MapPin, Package, ArrowLeft, Mail, Calendar, Weight, CheckCircle, Repeat, Trash2 } from 'lucide-react';
+import { MapPin, Package, ArrowLeft, Mail, Calendar, Weight, CheckCircle, Repeat, Trash2, Edit2 } from 'lucide-react';
 
 export default function ListingDetailPage() {
     const { id } = useParams();
@@ -66,7 +66,7 @@ export default function ListingDetailPage() {
 
         try {
             setUpdating(true);
-            await api.delete(`/listings/${id}`);
+            await api.delete(`listings/${id}`);
             navigate('/my-listings');
         } catch (err) {
             alert("Erreur lors de la suppression.");
@@ -173,6 +173,13 @@ export default function ListingDetailPage() {
                                                 Marquer réservé
                                             </button>
                                         )}
+                                        <Link
+                                            to={`/edit-listing/${id}`}
+                                            className="inline-flex justify-center items-center px-6 py-3 border border-purple-300 text-base font-medium rounded-md text-purple-700 bg-white hover:bg-purple-50"
+                                        >
+                                            <Edit2 className="w-5 h-5 mr-2" />
+                                            Modifier
+                                        </Link>
                                         <button
                                             onClick={handleDelete}
                                             disabled={updating}
