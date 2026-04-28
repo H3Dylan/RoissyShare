@@ -3,6 +3,9 @@ const path = require('path');
 const cors = require('cors');
 const authRoutes = require('./src/routes/auth.routes');
 const structureRoutes = require('./src/routes/structure.routes');
+const listingRoutes = require('./src/routes/listing.routes');
+const searchRoutes = require('./src/routes/search.routes');
+const messageRoutes = require('./src/routes/message.routes');
 
 const app = express();
 
@@ -10,12 +13,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Logger simple
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 // Servir les fichiers statiques du dossier uploads (pour les logos)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/structures', structureRoutes);
+app.use('/api/listings', listingRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/conversations', messageRoutes);
 
 const PORT = process.env.PORT || 3000;
 
