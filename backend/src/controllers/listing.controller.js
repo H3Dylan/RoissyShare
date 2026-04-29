@@ -320,5 +320,123 @@ module.exports = {
     getRSEStats,
     getRSETimeline,
     deleteListing,
-    updateListing
+    updateListing,
+    cancelReservation,
+    acceptReservation,
+    refuseReservation,
+    getMyReservations
 };
+
+// Annuler la réservation (dé-réserver) d'une annonce
+async function cancelReservation(req, res) {
+    try {
+        const structureId = req.user.structureId;
+        const { id } = req.params;
+
+        // Vérifier que l'annonce existe et appartient à l'utilisateur
+        const listing = await prisma.listing.findUnique({ where: { id } });
+        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
+        if (listing.structureId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+
+        // Seules les annonces réservées peuvent être dé-réservées
+        if (listing.status !== 'RESERVED') {
+            return res.status(400).json({ error: "Seules les annonces réservées peuvent être dé-réservées." });
+        }
+
+        const updatedListing = await prisma.listing.update({
+            where: { id },
+            data: { status: 'AVAILABLE' }
+        });
+
+        res.json({
+            message: "La réservation a été annulée, l'annonce est à nouveau disponible.",
+            listing: updatedListing
+        });
+    } catch (error) {
+        console.error("Erreur lors de l'annulation de la réservation:", error);
+        res.status(500).json({ error: "Erreur serveur lors de l'annulation de la réservation." });
+    }
+}
+
+module.exports.cancelReservation = cancelReservation;
+
+// Accepter une proposition de réservation
+async function acceptReservation(req, res) {
+    try {
+        const structureId = req.user.structureId;
+        const { id } = req.params;
+
+        const listing = await prisma.listing.findUnique({ where: { id } });
+        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
+        if (listing.structureId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+
+        // On ne peut accepter que si quelqu'un a proposé
+        if (!listing.reservedById) {
+            return res.status(400).json({ error: "Aucune proposition de réservation pour cette annonce." });
+        }
+
+        const updatedListing = await prisma.listing.update({
+            where: { id },
+            data: { status: 'RESERVED' }
+        });
+
+        res.json({
+            message: "Réservation acceptée.",
+            listing: updatedListing
+        });
+    } catch (error) {
+        console.error("Erreur lors de l'acceptation de la réservation:", error);
+        res.status(500).json({ error: "Erreur serveur." });
+    }
+}
+
+// Refuser une proposition de réservation
+async function refuseReservation(req, res) {
+    try {
+        const structureId = req.user.structureId;
+        const { id } = req.params;
+
+        const listing = await prisma.listing.findUnique({ where: { id } });
+        if (!listing) return res.status(404).json({ error: "Annonce non trouvée." });
+        if (listing.structureId !== structureId) return res.status(403).json({ error: "Non autorisé." });
+
+        // On refuse et on清除 le reservedById
+        const updatedListing = await prisma.listing.update({
+            where: { id },
+            data: { 
+                status: 'AVAILABLE',
+                reservedById: null
+            }
+        });
+
+        res.json({
+            message: "Réservation refusée.",
+            listing: updatedListing
+        });
+    } catch (error) {
+        console.error("Erreur lors du refus de la réservation:", error);
+        res.status(500).json({ error: "Erreur serveur." });
+    }
+}
+
+// Récupérer les annonces que j'ai réservées (en tant que demandeur)
+async function getMyReservations(req, res) {
+    try {
+        const userId = req.user.id;
+
+        const reservations = await prisma.listing.findMany({
+            where: { reservedById: userId },
+            include: {
+                structure: {
+                    select: { id: true, name: true, address: true, logoUrl: true }
+                }
+            },
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        res.json(reservations);
+    } catch (error) {
+        console.error("Erreur lors de la récupération des réservations:", error);
+        res.status(500).json({ error: "Erreur serveur." });
+    }
+}

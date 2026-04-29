@@ -1,0 +1,11 @@
+{
+  "name": "roissyshare",
+  "version": "1.0.0",
+  "description": "Roissy Share est une plateforme B2B d'économie circulaire dédiée au territoire de Roissy. Elle permet aux entreprises locales de donner, réserver et réemployer du matériel professionnel (mobilier, informatique, fournitures) afin de réduire leur empreinte carbone.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

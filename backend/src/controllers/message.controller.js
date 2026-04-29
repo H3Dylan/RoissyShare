@@ -31,6 +31,14 @@ async function startOrGetConversation(req, res) {
             return res.status(400).json({ error: "Vous ne pouvez pas vous contacter vous-même." });
         }
 
+        // Si l'annonce est disponible, on propose une réservation à l'annonceur
+        if (listing.status === 'AVAILABLE') {
+            await prisma.listing.update({
+                where: { id: listingId },
+                data: { reservedById: myUserId }
+            });
+        }
+
         // Vérifier si une conversation existe DÉJÀ entre nous deux, indépendamment de l'annonce visée
         let conversation = await prisma.conversation.findFirst({
             where: {

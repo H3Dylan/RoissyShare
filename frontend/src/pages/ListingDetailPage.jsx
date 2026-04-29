@@ -44,16 +44,57 @@ export default function ListingDetailPage() {
         try {
             setUpdating(true);
             const res = await api.patch(`/listings/${id}/status`, { status: newStatus });
-            
             if (res.data.impactGenerated) {
                 alert("🎉 Félicitations ! Votre don a été clôturé et l'impact CO2 a été comptabilisé !");
             }
-
             // Rafraîchir les données de l'annonce
             const response = await api.get(`/listings/${id}`);
             setListing(response.data);
         } catch (err) {
             alert("Impossible de mettre à jour le statut.");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Handler pour annuler la réservation (dé-réserver)
+    const handleCancelReservation = async () => {
+        try {
+            setUpdating(true);
+            await api.patch(`/listings/${id}/cancel-reservation`);
+            // Rafraîchir les données de l'annonce
+            const response = await api.get(`/listings/${id}`);
+            setListing(response.data);
+        } catch (err) {
+            alert("Impossible d'annuler la réservation.");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Handler pour accepter une proposition de réservation
+    const handleAcceptReservation = async () => {
+        try {
+            setUpdating(true);
+            await api.patch(`/listings/${id}/accept-reservation`);
+            const response = await api.get(`/listings/${id}`);
+            setListing(response.data);
+        } catch (err) {
+            alert("Impossible d'accepter la réservation.");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    // Handler pour refuser une proposition de réservation
+    const handleRefuseReservation = async () => {
+        try {
+            setUpdating(true);
+            await api.patch(`/listings/${id}/refuse-reservation`);
+            const response = await api.get(`/listings/${id}`);
+            setListing(response.data);
+        } catch (err) {
+            alert("Impossible de refuser la réservation.");
         } finally {
             setUpdating(false);
         }
@@ -143,6 +184,34 @@ export default function ListingDetailPage() {
                             {isOwner ? (
                                 <>
                                     <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-4">Gestion de votre annonce</h3>
+                                    
+                                    {/* Afficher les propositions de réservation si quelqu'un a proposé */}
+                                    {listing.reservedById && listing.status === 'AVAILABLE' && (
+                                        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <p className="text-sm font-medium text-yellow-800 mb-3">
+                                                ✋ Quelqu'un a proposé de réserver cette annonce !
+                                            </p>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={handleAcceptReservation}
+                                                    disabled={updating}
+                                                    className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:bg-green-400"
+                                                >
+                                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                                    Accepter
+                                                </button>
+                                                <button
+                                                    onClick={handleRefuseReservation}
+                                                    disabled={updating}
+                                                    className="flex-1 inline-flex justify-center items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md shadow-sm text-red-700 bg-white hover:bg-red-50 disabled:bg-gray-100"
+                                                >
+                                                    <Trash2 className="w-4 h-4 mr-2" />
+                                                    Refuser
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         {(listing.status === 'AVAILABLE' || listing.status === 'RESERVED') && (
                                             <button
@@ -171,6 +240,17 @@ export default function ListingDetailPage() {
                                                 className="flex-1 inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-yellow-500 hover:bg-yellow-600 disabled:bg-yellow-300"
                                             >
                                                 Marquer réservé
+                                            </button>
+                                        )}
+                                        {/* Bouton pour annuler la réservation si l'annonce est réservée */}
+                                        {listing.status === 'RESERVED' && (
+                                            <button
+                                                onClick={handleCancelReservation}
+                                                disabled={updating}
+                                                className="flex-1 inline-flex justify-center items-center px-6 py-3 border border-blue-300 text-base font-medium rounded-md shadow-sm text-blue-700 bg-white hover:bg-blue-50 disabled:bg-gray-100"
+                                            >
+                                                <Repeat className="w-5 h-5 mr-2" />
+                                                Annuler la réservation
                                             </button>
                                         )}
                                         <Link

@@ -52,6 +52,7 @@ model Listing {
   category     ListingCategory
   weightKg     Float
   structureId  String
+  reservedById String?        // ID de l'utilisateur qui a proposé de réserver
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   structure    Structure       @relation(fields: [structureId], references: [id])
